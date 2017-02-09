@@ -186,7 +186,7 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
    * @param  {mixed|object} mention  The choice to replace with
    * @param  {regex.exec()} [search] A regex search result for the trigger-text (default: this.searching)
    * @param  {string} [text]         String to perform the replacement on (default: ngModel.$viewValue)
-   * @return {string}                Human-readable string
+   * @return {object}                Human-readable string
    */
   this.replace = function (mention) {
     var search = arguments.length <= 1 || arguments[1] === undefined ? this.searching : arguments[1];
@@ -194,8 +194,13 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
     // TODO: come up with a better way to detect what to remove
     // TODO: consider alternative to using regex match
-    text = text.substr(0, search.index + search[0].indexOf(this.delimiter)) + this.label(mention) + ' ' + text.substr(search.index + search[0].length);
-    return text;
+    var before = text.substr(0, search.index + search[0].indexOf(this.delimiter)) + this.label(mention) + ' ';
+    var after = text.substr(search.index + search[0].length);
+    var replaced = before + after;
+    return {
+      result: replaced,
+      cursorIndex: before.length
+    };
   };
 
   /**
@@ -216,13 +221,17 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
     this.mentions.push(choice);
 
     // Replace the search with the label
-    ngModel.$setViewValue(this.replace(choice));
+    var replace = this.replace(choice);
+    ngModel.$setViewValue(replace.result);
 
     // Close choices panel
     this.cancel();
 
     // Update the textarea
     ngModel.$render();
+
+    // Move the cursor to the correct position
+    $element[0].setSelectionRange(replace.cursorIndex, replace.cursorIndex);
   };
 
   /**
@@ -324,12 +333,17 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
   });
 
   $element.on('keydown', function (event) {
-    if (!_this2.searching) return;
+    if (!_this2.searching || !_this2.activeChoice) return;
 
     switch (event.keyCode) {
+      case 9: // tab
       case 13:
         // return
         _this2.select();
+        break;
+      case 27:
+        // escape
+        _this2.cancel();
         break;
       case 38:
         // up

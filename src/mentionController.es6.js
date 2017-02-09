@@ -160,15 +160,18 @@ angular.module('ui.mention')
    * @param  {mixed|object} mention  The choice to replace with
    * @param  {regex.exec()} [search] A regex search result for the trigger-text (default: this.searching)
    * @param  {string} [text]         String to perform the replacement on (default: ngModel.$viewValue)
-   * @return {string}                Human-readable string
+   * @return {object}                Human-readable string
    */
   this.replace = function(mention, search = this.searching, text = ngModel.$viewValue) {
     // TODO: come up with a better way to detect what to remove
     // TODO: consider alternative to using regex match
-    text = text.substr(0, search.index + search[0].indexOf(this.delimiter)) +
-           this.label(mention) + ' ' +
-           text.substr(search.index + search[0].length);
-    return text;
+    let before = text.substr(0, search.index + search[0].indexOf(this.delimiter)) + this.label(mention) + ' ';
+    let after = text.substr(search.index + search[0].length)
+    let replaced = before + after;
+    return {
+      result: replaced,
+      cursorIndex: before.length
+    };
   };
 
   /**
@@ -187,13 +190,17 @@ angular.module('ui.mention')
     this.mentions.push(choice);
 
     // Replace the search with the label
-    ngModel.$setViewValue(this.replace(choice));
+    let replace = this.replace(choice)
+    ngModel.$setViewValue(replace.result);
 
     // Close choices panel
     this.cancel();
 
     // Update the textarea
     ngModel.$render();
+
+    // Move the cursor to the correct position
+    $element[0].setSelectionRange(replace.cursorIndex, replace.cursorIndex);
   };
 
   /**
@@ -297,12 +304,16 @@ angular.module('ui.mention')
   });
 
   $element.on('keydown', event => {
-    if (!this.searching)
+    if (!this.searching || !this.activeChoice)
       return;
 
     switch (event.keyCode) {
+      case 9:  // tab
       case 13: // return
         this.select();
+        break;
+      case 27: // escape
+        this.cancel();
         break;
       case 38: // up
         this.up();
