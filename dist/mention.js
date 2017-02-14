@@ -313,23 +313,21 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
   // Interactions to trigger searching
   $element.on('keyup click focus', function (event) {
-    // If event is fired AFTER activeChoice move is performed
-    if (_this2.moved) return _this2.moved = false;
-    // Don't trigger on selection
-    if ($element[0].selectionStart != $element[0].selectionEnd) return;
-    var text = $element.val();
-    // text to left of cursor ends with `@sometext`
-    var match = _this2.searchPattern.exec(text.substr(0, $element[0].selectionStart));
+    $timeout(function () {
+      // If event is fired AFTER activeChoice move is performed
+      if (_this2.moved) return _this2.moved = false;
+      // Don't trigger on selection
+      if ($element[0].selectionStart != $element[0].selectionEnd) return;
+      var text = $element.val();
+      // text to left of cursor ends with `@sometext`
+      var match = _this2.searchPattern.exec(text.substr(0, $element[0].selectionStart));
 
-    if (match) {
-      _this2.search(match);
-    } else {
-      _this2.cancel();
-    }
-
-    if (!$scope.$$phase) {
-      $scope.$apply();
-    }
+      if (match) {
+        _this2.search(match);
+      } else {
+        _this2.cancel();
+      }
+    });
   });
 
   $element.on('keydown', function (event) {

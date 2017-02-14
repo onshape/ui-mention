@@ -282,25 +282,23 @@ angular.module('ui.mention')
 
   // Interactions to trigger searching
   $element.on('keyup click focus', event => {
-    // If event is fired AFTER activeChoice move is performed
-    if (this.moved)
-      return this.moved = false;
-    // Don't trigger on selection
-    if ($element[0].selectionStart != $element[0].selectionEnd)
-      return;
-    let text = $element.val();
-    // text to left of cursor ends with `@sometext`
-    let match = this.searchPattern.exec(text.substr(0, $element[0].selectionStart));
+    $timeout(() => {
+      // If event is fired AFTER activeChoice move is performed
+      if (this.moved)
+        return this.moved = false;
+      // Don't trigger on selection
+      if ($element[0].selectionStart != $element[0].selectionEnd)
+        return;
+      let text = $element.val();
+      // text to left of cursor ends with `@sometext`
+      let match = this.searchPattern.exec(text.substr(0, $element[0].selectionStart));
 
-    if (match) {
-      this.search(match);
-    } else {
-      this.cancel();
-    }
-
-    if (!$scope.$$phase) {
-      $scope.$apply();
-    }
+      if (match) {
+        this.search(match);
+      } else {
+        this.cancel();
+      }
+    });
   });
 
   $element.on('keydown', event => {
