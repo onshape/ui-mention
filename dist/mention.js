@@ -232,6 +232,20 @@ angular.module('ui.mention').controller('uiMention', ["$element", "$scope", "$at
 
     // Move the cursor to the correct position
     $element[0].setSelectionRange(replace.cursorIndex, replace.cursorIndex);
+
+    // Call the onSlect callback
+    this.onSelect(choice, this.mentions, ngModel.$viewValue);
+  };
+
+  /**
+   * $mention.onSelect()
+   *
+   * @param {mixed|object} [choice]   The selected choice (default: activeChoice)
+   * @param {array[choice]} mentions  The array of mentions
+   * @param {string} viewValue        The current ng-model view value
+   */
+  this.onSelect = function (choice, mentions, viewValue) {
+    // This callback can be overridden
   };
 
   /**
