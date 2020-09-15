@@ -1,6 +1,6 @@
 {
-  "name": "angular-ui-mention",
-  "version": "0.0.8",
+  "name": "@onshape/angular-ui-mention",
+  "version": "0.1.0",
   "description": "Facebook-like @mentions for text inputs built around composability",
   "main": "dist/mention.js",
   "scripts": {
